@@ -1,5 +1,5 @@
 import { Box, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Text } from "@chakra-ui/react";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 interface WalletPageProps {}
 
@@ -8,11 +8,8 @@ const WalletPage: FC<WalletPageProps> = () => {
     const [action, setAction] = useState<number>(20)
     const [fii, setFii] = useState<number>(20)
     const [cripto, setCripto] = useState<number>(0)
-    const [max ,setMax] = useState<number>(100)
 
     const onChangeValue = (field: string, value: number) => {
-        console.log(value);
-        console.log(cannotChange(field, value));
         if (cannotChange(field, value) === false) {
             return
         }
@@ -32,7 +29,7 @@ const WalletPage: FC<WalletPageProps> = () => {
                 break;
         }
 
-        setMax(fix + cripto + action + fii)
+        saveLocalStorage(field, value)
     }
 
     const cannotChange = (field: string, value: number) => {
@@ -55,10 +52,34 @@ const WalletPage: FC<WalletPageProps> = () => {
                 criptoValue = value
                 break;
         }
-        console.log(fixValue + actionValue + fiiValue + criptoValue);
         
         return (fixValue + actionValue + fiiValue + criptoValue) <= 100
     }
+
+    const mountLocalStorageKey = (key: string): string => {
+        return `option-${key}`
+    }
+
+    const saveLocalStorage = (field: string, value: number) => {
+        localStorage.setItem(mountLocalStorageKey(field), value.toString())
+    }
+
+    const readLocalStorage = (field: string): number => {
+        let value = localStorage.getItem(mountLocalStorageKey(field))
+
+        if (value !== null) {
+            return parseFloat(value)
+        }
+
+        return 0
+    }
+
+    useEffect(() => {
+        setFix(readLocalStorage('fix'))
+        setFii(readLocalStorage('fii'))
+        setAction(readLocalStorage('action'))
+        setCripto(readLocalStorage('cripto'))
+    }, [])
 
     return (
         <Box mx={16}>
